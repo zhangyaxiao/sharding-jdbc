@@ -20,6 +20,7 @@ public class AliasExpressionParser {
     private final LexerEngine lexerEngine;
     
     /**
+     * 解析查询项的别名
      * Parse alias for select item.
      * 
      * @return alias for select item
@@ -28,19 +29,28 @@ public class AliasExpressionParser {
         if (lexerEngine.skipIfEqual(DefaultKeyword.AS)) {
             return parseWithAs();
         }
+        //别名关键字
         if (lexerEngine.equalAny(getDefaultAvailableKeywordsForSelectItemAlias()) || lexerEngine.equalAny(getCustomizedAvailableKeywordsForSelectItemAlias())) {
             return parseAlias();
         }
         return Optional.absent();
     }
-    
+
+    /**
+     * 解析 AS 之后的别名
+     * @return
+     */
     private Optional<String> parseWithAs() {
         if (lexerEngine.equalAny(Symbol.values())) {
             return Optional.absent();
         }
         return parseAlias();
     }
-    
+
+    /**
+     * 返回别名
+     * @return
+     */
     private Optional<String> parseAlias() {
         String result = SQLUtil.getExactlyValue(lexerEngine.getCurrentToken().getLiterals());
         lexerEngine.nextToken();
@@ -61,6 +71,7 @@ public class AliasExpressionParser {
     }
     
     /**
+     * 返回表的别名
      * Parse alias for table.
      *
      * @return alias for table

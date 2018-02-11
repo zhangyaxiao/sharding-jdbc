@@ -61,34 +61,34 @@ public class TableReferencesClauseParser implements SQLClauseParser {
     
     protected final void parseTableFactor(final SQLStatement sqlStatement, final boolean isSingleTableOnly) {
         final int beginPosition = lexerEngine.getCurrentToken().getEndPosition() - lexerEngine.getCurrentToken().getLiterals().length();
-        String literals = lexerEngine.getCurrentToken().getLiterals();
+        String literals = lexerEngine.getCurrentToken().getLiterals();//查询的表
         lexerEngine.nextToken();
-        if (lexerEngine.equalAny(Symbol.DOT)) {
+        if (lexerEngine.equalAny(Symbol.DOT)) {//不支持指定库的查询
             throw new UnsupportedOperationException("Cannot support SQL for `schema.table`");
         }
         String tableName = SQLUtil.getExactlyValue(literals);
         if (Strings.isNullOrEmpty(tableName)) {
             return;
         }
-        Optional<String> alias = aliasExpressionParser.parseTableAlias();
+        Optional<String> alias = aliasExpressionParser.parseTableAlias();//表的别名
         if (isSingleTableOnly || shardingRule.tryFindTableRule(tableName).isPresent() || shardingRule.findBindingTableRule(tableName).isPresent()
                 || shardingRule.getDataSourceMap().containsKey(shardingRule.getDefaultDataSourceName())) {
-            sqlStatement.getSqlTokens().add(new TableToken(beginPosition, literals));
-            sqlStatement.getTables().add(new Table(tableName, alias));
+            sqlStatement.getSqlTokens().add(new TableToken(beginPosition, literals));//保存sql中的原始
+            sqlStatement.getTables().add(new Table(tableName, alias));//保存表名
         }
-        parseJoinTable(sqlStatement);
+        parseJoinTable(sqlStatement);//解析join
         if (isSingleTableOnly && !sqlStatement.getTables().isSingleTable()) {
             throw new UnsupportedOperationException("Cannot support Multiple-Table.");
         }
     }
     
     private void parseJoinTable(final SQLStatement sqlStatement) {
-        while (parseJoinType()) {
-            if (lexerEngine.equalAny(Symbol.LEFT_PAREN)) {
+        while (parseJoinType()) { // 如果是 join查询
+            if (lexerEngine.equalAny(Symbol.LEFT_PAREN)) {//不支持join子查询
                 throw new UnsupportedOperationException("Cannot support sub query for join table.");
             }
-            parseTableFactor(sqlStatement, false);
-            parseJoinCondition(sqlStatement);
+            parseTableFactor(sqlStatement, false);//解析表名
+            parseJoinCondition(sqlStatement); // 解析 on
         }
     }
     
@@ -108,7 +108,8 @@ public class TableReferencesClauseParser implements SQLClauseParser {
     protected Keyword[] getKeywordsForJoinType() {
         return new Keyword[0];
     }
-    
+
+    //TODO zyx join后的 on和using解析
     private void parseJoinCondition(final SQLStatement sqlStatement) {
         if (lexerEngine.skipIfEqual(DefaultKeyword.ON)) {
             do {

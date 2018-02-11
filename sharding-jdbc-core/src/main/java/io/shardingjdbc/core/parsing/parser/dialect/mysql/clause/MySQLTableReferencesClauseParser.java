@@ -21,9 +21,9 @@ public final class MySQLTableReferencesClauseParser extends TableReferencesClaus
     
     @Override
     protected void parseTableReference(final SQLStatement sqlStatement, final boolean isSingleTableOnly) {
-        parseTableFactor(sqlStatement, isSingleTableOnly);
-        parsePartition();
-        parseIndexHint(sqlStatement);
+        parseTableFactor(sqlStatement, isSingleTableOnly);//解析表名
+        parsePartition(); //不支持PARTITION
+        parseIndexHint(sqlStatement);//TODO zyx 解析hint
     }
     
     private void parsePartition() {

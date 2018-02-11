@@ -35,16 +35,21 @@ import lombok.RequiredArgsConstructor;
 import java.util.Set;
 
 /**
+ * 分词引擎
  * Lexical analysis engine.
  *
  * @author zhangliang
  */
 @RequiredArgsConstructor
 public final class LexerEngine {
-    
+
+    /**
+     * 词法解析器
+     */
     private final Lexer lexer;
     
     /**
+     * 获得 SQL
      * Get input string.
      * 
      * @return inputted string
@@ -54,6 +59,7 @@ public final class LexerEngine {
     }
     
     /**
+     * 下一个词法标记
      * Analyse next token.
      */
     public void nextToken() {
@@ -61,6 +67,7 @@ public final class LexerEngine {
     }
     
     /**
+     * 当前的词法标记
      * Get current token.
      * 
      * @return current token
@@ -70,6 +77,7 @@ public final class LexerEngine {
     }
     
     /**
+     *
      * skip all tokens that inside parentheses.
      *
      * @param sqlStatement SQL statement
@@ -115,6 +123,7 @@ public final class LexerEngine {
     }
     
     /**
+     * 判断当前令牌是否等于输入的令牌其中一个
      * Adjust current token equals one of input tokens or not.
      *
      * @param tokenTypes to be adjusted token types
@@ -130,6 +139,8 @@ public final class LexerEngine {
     }
     
     /**
+     * 判断当前令牌是否等于输入的令牌其中一个
+     * 如果等于跳过参数中的token，并且返回true
      * Skip current token if equals one of input tokens.
      *
      * @param tokenTypes to be adjusted token types
@@ -144,6 +155,7 @@ public final class LexerEngine {
     }
     
     /**
+     * 跳过参数中的token
      * Skip all input tokens.
      *
      * @param tokenTypes to be skipped token types
@@ -169,6 +181,7 @@ public final class LexerEngine {
     }
     
     /**
+     * 如果当前令牌等于输入令牌的其中一个，则抛出不支持的异常
      * Throw unsupported exception if current token equals one of input tokens.
      * 
      * @param tokenTypes to be adjusted token types

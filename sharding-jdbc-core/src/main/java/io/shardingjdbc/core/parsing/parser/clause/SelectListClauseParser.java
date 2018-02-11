@@ -50,22 +50,26 @@ public class SelectListClauseParser implements SQLClauseParser {
         do {
             selectStatement.getItems().add(parseSelectItem(selectStatement));
         } while (lexerEngine.skipIfEqual(Symbol.COMMA));
+        //计算 最后一个查询项下一个token的开始位置
         selectStatement.setSelectListLastPosition(lexerEngine.getCurrentToken().getEndPosition() - lexerEngine.getCurrentToken().getLiterals().length());
+        //将 查询项解析结果 放入select分析器中
         items.addAll(selectStatement.getItems());
     }
     
     private SelectItem parseSelectItem(final SelectStatement selectStatement) {
-        lexerEngine.skipIfEqual(getSkippedKeywordsBeforeSelectItem());
+        lexerEngine.skipIfEqual(getSkippedKeywordsBeforeSelectItem());//跳过部分词法
         SelectItem result;
-        if (isRowNumberSelectItem()) {
+        if (isRowNumberSelectItem()) {//sqlserver关键字 ROW_NUMBER
             result = parseRowNumberSelectItem(selectStatement);
-        } else if (isStarSelectItem()) {
+        } else if (isStarSelectItem()) {//是否查询 *
             selectStatement.setContainStar(true);
-            result = parseStarSelectItem();
-        } else if (isAggregationSelectItem()) {
+            result = parseStarSelectItem();//selectItem是空的
+        } else if (isAggregationSelectItem()) {//集合项 MAX MIN SUM AVG COUNT
+            //TODO zyx 查询项解析
             result = parseAggregationSelectItem(selectStatement);
-            parseRestSelectItem(selectStatement);
+            parseRestSelectItem(selectStatement);//
         } else {
+            //创建CommonSelectItem，包含查询项表达语句，和别名
             result = new CommonSelectItem(SQLUtil.getExactlyValue(parseCommonSelectItem(selectStatement) + parseRestSelectItem(selectStatement)), aliasExpressionParser.parseSelectItemAlias());
         }
         return result;
@@ -89,20 +93,20 @@ public class SelectListClauseParser implements SQLClauseParser {
     
     private SelectItem parseStarSelectItem() {
         lexerEngine.nextToken();
-        aliasExpressionParser.parseSelectItemAlias();
-        return new StarSelectItem(Optional.<String>absent());
+        aliasExpressionParser.parseSelectItemAlias();//跳过一部分词法
+        return new StarSelectItem(Optional.<String>absent());//返回一个空的selectItem
     }
     
     private boolean isAggregationSelectItem() {
         return lexerEngine.equalAny(DefaultKeyword.MAX, DefaultKeyword.MIN, DefaultKeyword.SUM, DefaultKeyword.AVG, DefaultKeyword.COUNT);
     }
-    
+
     private SelectItem parseAggregationSelectItem(final SelectStatement selectStatement) {
         AggregationType aggregationType = AggregationType.valueOf(lexerEngine.getCurrentToken().getLiterals().toUpperCase());
         lexerEngine.nextToken();
         return new AggregationSelectItem(aggregationType, lexerEngine.skipParentheses(selectStatement), aliasExpressionParser.parseSelectItemAlias());
     }
-    
+
     private String parseCommonSelectItem(final SelectStatement selectStatement) {
         String literals = lexerEngine.getCurrentToken().getLiterals();
         int position = lexerEngine.getCurrentToken().getEndPosition() - literals.length();
@@ -123,10 +127,10 @@ public class SelectListClauseParser implements SQLClauseParser {
         }
         return result.toString();
     }
-    
+
     private String parseRestSelectItem(final SelectStatement selectStatement) {
         StringBuilder result = new StringBuilder();
-        while (lexerEngine.equalAny(Symbol.getOperators())) {
+        while (lexerEngine.equalAny(Symbol.getOperators())) {//如果是符号
             result.append(lexerEngine.getCurrentToken().getLiterals());
             lexerEngine.nextToken();
             result.append(parseCommonSelectItem(selectStatement));

@@ -26,7 +26,10 @@ import io.shardingjdbc.core.parsing.lexer.Lexer;
  * @author zhangliang
  */
 public final class MySQLLexer extends Lexer {
-    
+
+    /**
+     * 字典
+     */
     private static Dictionary dictionary = new Dictionary(MySQLKeyword.values());
     
     public MySQLLexer(final String input) {

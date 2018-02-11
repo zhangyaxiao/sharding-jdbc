@@ -33,44 +33,60 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public class Lexer {
-    
+
+    /**
+     * SQL
+     */
     @Getter
     private final String input;
-    
+
+    /**
+     * 词法标记字典
+     */
     private final Dictionary dictionary;
-    
+
+    /**
+     * 解析sql的 offset（偏移）
+     */
     private int offset;
-    
+
+    /**
+     * 当前词法标记
+     */
     @Getter
     private Token currentToken;
     
     /**
+     * 分析下一个词法标记
      * Analyse next token.
      */
     public final void nextToken() {
-        skipIgnoredToken();
-        if (isVariableBegin()) {
+        skipIgnoredToken();//跳过空白和注释
+        if (isVariableBegin()) {//@ 字符开头（变量）
             currentToken = new Tokenizer(input, dictionary, offset).scanVariable();
-        } else if (isNCharBegin()) {
+        } else if (isNCharBegin()) {//N 字符开头，在sql server中 大写N存在特殊含义
             currentToken = new Tokenizer(input, dictionary, ++offset).scanChars();
-        } else if (isIdentifierBegin()) {
+        } else if (isIdentifierBegin()) {//字母 || _ || $ ||` 开头
             currentToken = new Tokenizer(input, dictionary, offset).scanIdentifier();
-        } else if (isHexDecimalBegin()) {
+        } else if (isHexDecimalBegin()) {//0x开头  16进制
             currentToken = new Tokenizer(input, dictionary, offset).scanHexDecimal();
-        } else if (isNumberBegin()) {
+        } else if (isNumberBegin()) {//数字开头，包括小数，负数
             currentToken = new Tokenizer(input, dictionary, offset).scanNumber();
-        } else if (isSymbolBegin()) {
+        } else if (isSymbolBegin()) {//符号开头
             currentToken = new Tokenizer(input, dictionary, offset).scanSymbol();
-        } else if (isCharsBegin()) {
+        } else if (isCharsBegin()) {//单引号或双引号开头
             currentToken = new Tokenizer(input, dictionary, offset).scanChars();
-        } else if (isEnd()) {
+        } else if (isEnd()) {//后面没有了
             currentToken = new Token(Assist.END, "", offset);
         } else {
             throw new SQLParsingException(this, Assist.ERROR);
         }
         offset = currentToken.getEndPosition();
     }
-    
+
+    /**
+     * 跳过空白和注释
+     */
     private void skipIgnoredToken() {
         offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         while (isHintBegin()) {
@@ -78,7 +94,9 @@ public class Lexer {
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
         while (isCommentBegin()) {
+            //删除注释
             offset = new Tokenizer(input, dictionary, offset).skipComment();
+            //删除空白
             offset = new Tokenizer(input, dictionary, offset).skipWhitespace();
         }
     }
@@ -86,7 +104,11 @@ public class Lexer {
     protected boolean isHintBegin() {
         return false;
     }
-    
+
+    /**
+     * 注释开头
+     * @return
+     */
     protected boolean isCommentBegin() {
         char current = getCurrentChar(0);
         char next = getCurrentChar(1);

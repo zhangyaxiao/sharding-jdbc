@@ -32,7 +32,10 @@ import lombok.RequiredArgsConstructor;
  */
 @RequiredArgsConstructor
 public final class SQLParsingEngine {
-    
+
+    /**
+     * 数据库类型
+     */
     private final DatabaseType dbType;
     
     private final String sql;
@@ -45,7 +48,9 @@ public final class SQLParsingEngine {
      * @return parsed SQL statement
      */
     public SQLStatement parse() {
+        //初始化分词引擎
         LexerEngine lexerEngine = LexerEngineFactory.newInstance(dbType, sql);
+        //sql第一个词法标记
         lexerEngine.nextToken();
         return SQLParserFactory.newInstance(dbType, lexerEngine.getCurrentToken().getType(), shardingRule, lexerEngine).parse();
     }

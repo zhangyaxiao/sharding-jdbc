@@ -54,7 +54,10 @@ import java.util.List;
 public final class ParsingSQLRouter implements SQLRouter {
     
     private final ShardingRule shardingRule;
-    
+
+    /**
+     * 数据库类型
+     */
     private final DatabaseType databaseType;
     
     private final boolean showSQL;

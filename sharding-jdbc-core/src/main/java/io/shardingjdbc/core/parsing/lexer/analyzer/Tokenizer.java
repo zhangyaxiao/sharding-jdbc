@@ -25,6 +25,7 @@ import io.shardingjdbc.core.parsing.lexer.token.TokenType;
 import lombok.RequiredArgsConstructor;
 
 /**
+ * 标记解析器
  * Tokenizer.
  *
  * @author zhangliang
@@ -41,11 +42,20 @@ public final class Tokenizer {
     private static final int COMMENT_AND_HINT_END_SYMBOL_LENGTH = 2;
     
     private static final int HEX_BEGIN_SYMBOL_LENGTH = 2;
-    
+
+    /**
+     * SQL
+     */
     private final String input;
-    
+
+    /**
+     * 词法标记字典
+     */
     private final Dictionary dictionary;
-    
+
+    /**
+     * 解析sql的 offset（偏移）
+     */
     private final int offset;
     
     /**
@@ -124,6 +134,7 @@ public final class Tokenizer {
     }
     
     /**
+     * 扫描变量
      * scan variable.
      *
      * @return variable token

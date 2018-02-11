@@ -31,8 +31,14 @@ import lombok.ToString;
 @Getter
 @ToString
 public final class CommonSelectItem implements SelectItem {
-    
+
+    /**
+     * 查询项表达语句
+     */
     private final String expression;
-    
+
+    /**
+     * 别名
+     */
     private final Optional<String> alias;
 }

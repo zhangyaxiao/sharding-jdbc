@@ -44,13 +44,13 @@ public final class MySQLSelectParser extends AbstractSelectParser {
     
     @Override
     protected void parseInternal(final SelectStatement selectStatement) {
-        parseDistinct();
-        parseSelectOption();
-        parseSelectList(selectStatement, getItems());
-        parseFrom(selectStatement);
+        parseDistinct();//删除ALL 不支持DISTINCT
+        parseSelectOption();//跳过一部分token
+        parseSelectList(selectStatement, getItems());//解析查询项
+        parseFrom(selectStatement);//解析from后的语句 表名，join，子查询
         parseWhere(getShardingRule(), selectStatement, getItems());
         parseGroupBy(selectStatement);
-        parseHaving();
+        parseHaving();//不支持 HAVING
         parseOrderBy(selectStatement);
         parseLimit(selectStatement);
         parseSelectRest();

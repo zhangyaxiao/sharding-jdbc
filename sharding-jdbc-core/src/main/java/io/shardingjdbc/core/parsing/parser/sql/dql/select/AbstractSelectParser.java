@@ -77,6 +77,7 @@ public abstract class AbstractSelectParser implements SQLParser {
     
     private SelectStatement parseInternal() {
         SelectStatement result = new SelectStatement();
+        //删除空格，获取下一个分词标记
         lexerEngine.nextToken();
         parseInternal(result);
         return result;
@@ -93,14 +94,14 @@ public abstract class AbstractSelectParser implements SQLParser {
     }
     
     protected final void parseFrom(final SelectStatement selectStatement) {
-        lexerEngine.unsupportedIfEqual(DefaultKeyword.INTO);
+        lexerEngine.unsupportedIfEqual(DefaultKeyword.INTO);//不支持 select into 语法
         if (lexerEngine.skipIfEqual(DefaultKeyword.FROM)) {
             parseTable(selectStatement);
         }
     }
     
     private void parseTable(final SelectStatement selectStatement) {
-        if (lexerEngine.skipIfEqual(Symbol.LEFT_PAREN)) {
+        if (lexerEngine.skipIfEqual(Symbol.LEFT_PAREN)) {// 解析 from 中的子查询
             selectStatement.setSubQueryStatement(parseInternal());
             if (lexerEngine.equalAny(DefaultKeyword.WHERE, Assist.END)) {
                 return;

@@ -73,7 +73,7 @@ public class WhereClauseParser implements SQLClauseParser {
         do {
             parseComparisonCondition(shardingRule, sqlStatement, items);
         } while (lexerEngine.skipIfEqual(DefaultKeyword.AND));
-        lexerEngine.unsupportedIfEqual(DefaultKeyword.OR);
+        lexerEngine.unsupportedIfEqual(DefaultKeyword.OR); //不支持 or
     }
     
     private void parseComparisonCondition(final ShardingRule shardingRule, final SQLStatement sqlStatement, final List<SelectItem> items) {

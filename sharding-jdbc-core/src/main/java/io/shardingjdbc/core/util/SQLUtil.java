@@ -34,7 +34,8 @@ public class SQLUtil {
     
     /**
      * Get exactly value for SQL expression.
-     * 
+     *
+     * 删除特殊字符
      * <p>remove special char for SQL expression</p>
      * 
      * @param value SQL expression

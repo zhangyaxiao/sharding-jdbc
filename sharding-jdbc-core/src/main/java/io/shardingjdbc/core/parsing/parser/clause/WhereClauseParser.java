@@ -65,33 +65,40 @@ public class WhereClauseParser implements SQLClauseParser {
     public void parse(final ShardingRule shardingRule, final SQLStatement sqlStatement, final List<SelectItem> items) {
         aliasExpressionParser.parseTableAlias();
         if (lexerEngine.skipIfEqual(DefaultKeyword.WHERE)) {
+            //解析查询条件
             parseConditions(shardingRule, sqlStatement, items);
         }
     }
     
     private void parseConditions(final ShardingRule shardingRule, final SQLStatement sqlStatement, final List<SelectItem> items) {
         do {
-            parseComparisonCondition(shardingRule, sqlStatement, items);
+            parseComparisonCondition(shardingRule, sqlStatement, items);//逐条解析查询条件
         } while (lexerEngine.skipIfEqual(DefaultKeyword.AND));
         lexerEngine.unsupportedIfEqual(DefaultKeyword.OR); //不支持 or
     }
-    
+
+    /**
+     * 逐条解析查询条件
+     * @param shardingRule
+     * @param sqlStatement
+     * @param items
+     */
     private void parseComparisonCondition(final ShardingRule shardingRule, final SQLStatement sqlStatement, final List<SelectItem> items) {
-        lexerEngine.skipIfEqual(Symbol.LEFT_PAREN);
-        SQLExpression left = basicExpressionParser.parse(sqlStatement);
-        if (lexerEngine.skipIfEqual(Symbol.EQ)) {
-            parseEqualCondition(shardingRule, sqlStatement, left);
-            lexerEngine.skipIfEqual(Symbol.RIGHT_PAREN);
+        lexerEngine.skipIfEqual(Symbol.LEFT_PAREN);// 跳过 (
+        SQLExpression left = basicExpressionParser.parse(sqlStatement);//sql表达式
+        if (lexerEngine.skipIfEqual(Symbol.EQ)) {// 跳过 =
+            parseEqualCondition(shardingRule, sqlStatement, left);//保存Condition
+            lexerEngine.skipIfEqual(Symbol.RIGHT_PAREN);// 跳过 )
             return;
         }
-        if (lexerEngine.skipIfEqual(DefaultKeyword.IN)) {
+        if (lexerEngine.skipIfEqual(DefaultKeyword.IN)) {//in
             parseInCondition(shardingRule, sqlStatement, left);
-            lexerEngine.skipIfEqual(Symbol.RIGHT_PAREN);
+            lexerEngine.skipIfEqual(Symbol.RIGHT_PAREN);// 跳过 )
             return;
         }
-        if (lexerEngine.skipIfEqual(DefaultKeyword.BETWEEN)) {
+        if (lexerEngine.skipIfEqual(DefaultKeyword.BETWEEN)) {// 跳过 between
             parseBetweenCondition(shardingRule, sqlStatement, left);
-            lexerEngine.skipIfEqual(Symbol.RIGHT_PAREN);
+            lexerEngine.skipIfEqual(Symbol.RIGHT_PAREN);// 跳过 )
             return;
         }
         if (sqlStatement instanceof SelectStatement && isRowNumberCondition(items, left)) {
@@ -129,7 +136,8 @@ public class WhereClauseParser implements SQLClauseParser {
     }
     
     private void parseEqualCondition(final ShardingRule shardingRule, final SQLStatement sqlStatement, final SQLExpression left) {
-        SQLExpression right = basicExpressionParser.parse(sqlStatement);
+        SQLExpression right = basicExpressionParser.parse(sqlStatement);//右边的表达式
+        //将可以识别的表达式保存到 Condition
         // TODO if have more tables, and cannot find column belong to, should not add to condition, should parse binding table rule.
         if ((sqlStatement.getTables().isSingleTable() || left instanceof SQLPropertyExpression)
                 && (right instanceof SQLNumberExpression || right instanceof SQLTextExpression || right instanceof SQLPlaceholderExpression)) {

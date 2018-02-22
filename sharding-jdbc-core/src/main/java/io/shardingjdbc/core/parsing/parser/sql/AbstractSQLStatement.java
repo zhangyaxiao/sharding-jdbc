@@ -39,11 +39,21 @@ import java.util.List;
 @Setter
 @ToString
 public abstract class AbstractSQLStatement implements SQLStatement {
-    
+
+    /**
+     * sql类型
+     * DQL DML DDL
+     */
     private final SQLType type;
-    
+
+    /**
+     * 涉及的表名
+     */
     private final Tables tables = new Tables();
-    
+
+    /**
+     * where查询条件
+     */
     private final Conditions conditions = new Conditions();
     
     private final List<SQLToken> sqlTokens = new LinkedList<>();

@@ -28,8 +28,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public final class SQLPropertyExpression implements SQLExpression {
-    
+
+    //表 别名
     private final SQLIdentifierExpression owner;
-    
+
+    //列名
     private final String name;
 }

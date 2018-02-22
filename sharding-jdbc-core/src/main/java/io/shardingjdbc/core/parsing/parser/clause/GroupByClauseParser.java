@@ -43,7 +43,7 @@ public class GroupByClauseParser implements SQLClauseParser {
         lexerEngine.accept(DefaultKeyword.BY);
         while (true) {
             addGroupByItem(basicExpressionParser.parse(selectStatement), selectStatement);
-            if (!lexerEngine.equalAny(Symbol.COMMA)) {
+            if (!lexerEngine.equalAny(Symbol.COMMA)) {// 符号 ,
                 break;
             }
             lexerEngine.nextToken();

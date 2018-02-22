@@ -48,12 +48,12 @@ public final class MySQLSelectParser extends AbstractSelectParser {
         parseSelectOption();//跳过一部分token
         parseSelectList(selectStatement, getItems());//解析查询项
         parseFrom(selectStatement);//解析from后的语句 表名，join，子查询
-        parseWhere(getShardingRule(), selectStatement, getItems());
-        parseGroupBy(selectStatement);
+        parseWhere(getShardingRule(), selectStatement, getItems());//解析where项
+        parseGroupBy(selectStatement);//解析 group by
         parseHaving();//不支持 HAVING
-        parseOrderBy(selectStatement);
-        parseLimit(selectStatement);
-        parseSelectRest();
+        parseOrderBy(selectStatement);//解析 order by
+        parseLimit(selectStatement);// 解析 limit
+        parseSelectRest();//不支持的特殊查询 SQL
     }
     
     private void parseSelectOption() {

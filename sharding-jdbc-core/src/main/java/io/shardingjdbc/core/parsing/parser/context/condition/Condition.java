@@ -32,15 +32,22 @@ import java.util.Map.Entry;
 @EqualsAndHashCode
 @ToString
 public final class Condition {
-    
+
+    /**
+     * 列名
+     */
     @Getter
     private final Column column;
-    
+
+    /**
+     * 判断条件
+     */
     @Getter
     private final ShardingOperator operator;
-    
+
+    //判断的int值
     private final Map<Integer, Comparable<?>> positionValueMap = new LinkedHashMap<>();
-    
+    //判断的字符串值
     private final Map<Integer, Integer> positionIndexMap = new LinkedHashMap<>();
     
     public Condition(final Column column, final SQLExpression sqlExpression) {

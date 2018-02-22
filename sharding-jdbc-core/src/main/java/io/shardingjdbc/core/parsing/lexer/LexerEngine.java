@@ -77,7 +77,7 @@ public final class LexerEngine {
     }
     
     /**
-     *
+     * 返回
      * skip all tokens that inside parentheses.
      *
      * @param sqlStatement SQL statement

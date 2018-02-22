@@ -79,6 +79,7 @@ public abstract class AbstractSelectParser implements SQLParser {
         SelectStatement result = new SelectStatement();
         //删除空格，获取下一个分词标记
         lexerEngine.nextToken();
+        //解析sql 得到SelectStatement
         parseInternal(result);
         return result;
     }
@@ -107,6 +108,7 @@ public abstract class AbstractSelectParser implements SQLParser {
                 return;
             }
         }
+        //解析表名
         selectClauseParserFacade.getTableReferencesClauseParser().parse(selectStatement, false);
     }
     

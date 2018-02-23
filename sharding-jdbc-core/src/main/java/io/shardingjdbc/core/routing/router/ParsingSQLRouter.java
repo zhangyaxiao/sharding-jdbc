@@ -73,7 +73,9 @@ public final class ParsingSQLRouter implements SQLRouter {
     
     @Override
     public SQLStatement parse(final String logicSQL, final int parametersSize) {
+        //创建sql解析引擎
         SQLParsingEngine parsingEngine = new SQLParsingEngine(databaseType, logicSQL, shardingRule);
+        //解析sql，得到SQLStatement
         SQLStatement result = parsingEngine.parse();
         if (result instanceof InsertStatement) {
             ((InsertStatement) result).appendGenerateKeyToken(shardingRule, parametersSize);

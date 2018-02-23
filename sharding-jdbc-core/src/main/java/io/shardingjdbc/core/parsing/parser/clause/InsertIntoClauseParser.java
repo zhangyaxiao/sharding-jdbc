@@ -25,10 +25,10 @@ public class InsertIntoClauseParser implements SQLClauseParser {
      * @param insertStatement insert statement
      */
     public void parse(final InsertStatement insertStatement) {
-        lexerEngine.unsupportedIfEqual(getUnsupportedKeywordsBeforeInto());
-        lexerEngine.skipUntil(DefaultKeyword.INTO);
+        lexerEngine.unsupportedIfEqual(getUnsupportedKeywordsBeforeInto());//跳过不支持的关键字
+        lexerEngine.skipUntil(DefaultKeyword.INTO);//跳过 into
         lexerEngine.nextToken();
-        tableReferencesClauseParser.parse(insertStatement, true);
+        tableReferencesClauseParser.parse(insertStatement, true);//解析表名
         skipBetweenTableAndValues(insertStatement);
     }
     

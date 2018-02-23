@@ -40,6 +40,7 @@ import java.util.List;
 
 /**
  * Select parser.
+ * select 类型的sql解析器
  * 
  * @author zhangliang 
  */
@@ -62,11 +63,18 @@ public abstract class AbstractSelectParser implements SQLParser {
     private final AbstractSelectClauseParserFacade selectClauseParserFacade;
     
     private final List<SelectItem> items = new LinkedList<>();
-    
+
+    /**
+     * 解析 查询 sql
+     * @return
+     */
     @Override
     public final SelectStatement parse() {
+        //解析sql
         SelectStatement result = parseInternal();
+        //如果存在子查询
         if (result.containsSubQuery()) {
+            //解析子查询
             result = result.mergeSubQueryStatement();
         }
         // TODO move to rewrite

@@ -53,10 +53,12 @@ public abstract class AbstractInsertParser implements SQLParser {
     
     @Override
     public final DMLStatement parse() {
+        //跳过 insert
         lexerEngine.nextToken();
         InsertStatement result = new InsertStatement();
         insertClauseParserFacade.getInsertIntoClauseParser().parse(result);
         insertClauseParserFacade.getInsertColumnsClauseParser().parse(result);
+        //不支持 insert select
         if (lexerEngine.equalAny(DefaultKeyword.SELECT, Symbol.LEFT_PAREN)) {
             throw new UnsupportedOperationException("Cannot INSERT SELECT");
         }

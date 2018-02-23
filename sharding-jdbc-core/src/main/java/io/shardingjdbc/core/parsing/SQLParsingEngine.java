@@ -48,10 +48,11 @@ public final class SQLParsingEngine {
      * @return parsed SQL statement
      */
     public SQLStatement parse() {
-        //初始化分词引擎
+        //根据数据库类型，初始化分词引擎
         LexerEngine lexerEngine = LexerEngineFactory.newInstance(dbType, sql);
         //sql第一个词法标记
         lexerEngine.nextToken();
+        //根据sql类型，创建sql分词器，解析sql
         return SQLParserFactory.newInstance(dbType, lexerEngine.getCurrentToken().getType(), shardingRule, lexerEngine).parse();
     }
 }

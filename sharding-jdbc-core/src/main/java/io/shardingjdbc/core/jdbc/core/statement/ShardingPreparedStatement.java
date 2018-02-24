@@ -112,7 +112,9 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     public ResultSet executeQuery() throws SQLException {
         ResultSet result;
         try {
+            //解析sql，根据分库分表策略进行路由
             Collection<PreparedStatementUnit> preparedStatementUnits = route();
+            //执行器执行 解析结果
             List<ResultSet> resultSets = new PreparedStatementExecutor(
                     getConnection().getShardingContext().getExecutorEngine(), routeResult.getSqlStatement().getType(), preparedStatementUnits, getParameters()).executeQuery();
             result = new ShardingResultSet(resultSets, new MergeEngine(resultSets, (SelectStatement) routeResult.getSqlStatement()).merge(), this);
@@ -147,6 +149,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
     
     private Collection<PreparedStatementUnit> route() throws SQLException {
         Collection<PreparedStatementUnit> result = new LinkedList<>();
+        //sql解析，路由
         routeResult = routingEngine.route(getParameters());
         for (SQLExecutionUnit each : routeResult.getExecutionUnits()) {
             SQLType sqlType = routeResult.getSqlStatement().getType();

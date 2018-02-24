@@ -77,6 +77,7 @@ public final class ParsingSQLRouter implements SQLRouter {
         SQLParsingEngine parsingEngine = new SQLParsingEngine(databaseType, logicSQL, shardingRule);
         //解析sql，得到SQLStatement
         SQLStatement result = parsingEngine.parse();
+        //如果是插入sql，插入主键
         if (result instanceof InsertStatement) {
             ((InsertStatement) result).appendGenerateKeyToken(shardingRule, parametersSize);
         }
@@ -114,13 +115,16 @@ public final class ParsingSQLRouter implements SQLRouter {
     }
     
     private RoutingResult route(final List<Object> parameters, final SQLStatement sqlStatement) {
-        Collection<String> tableNames = sqlStatement.getTables().getTableNames();
+        Collection<String> tableNames = sqlStatement.getTables().getTableNames();//sql 涉及的表名
         RoutingEngine routingEngine;
-        if (sqlStatement instanceof DDLStatement) {
+        if (sqlStatement instanceof DDLStatement) {// create alter drop
             routingEngine = new DDLRoutingEngine(shardingRule, parameters, (DDLStatement) sqlStatement); 
-        } else if (tableNames.isEmpty()) {
+        } else if (tableNames.isEmpty()) {//不涉及表
             routingEngine = new DatabaseAllRoutingEngine(shardingRule.getDataSourceMap());
         } else if (1 == tableNames.size() || shardingRule.isAllBindingTables(tableNames) || shardingRule.isAllInDefaultDataSource(tableNames)) {
+            //单表，
+            // TODO zyx 或者
+            //创建简单的路由引擎
             routingEngine = new SimpleRoutingEngine(shardingRule, parameters, tableNames.iterator().next(), sqlStatement);
         } else {
             // TODO config for cartesian set

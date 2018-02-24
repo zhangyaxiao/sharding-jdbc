@@ -32,19 +32,20 @@ import java.util.Map;
 
 /**
  * Table rule configuration.
- * 
+ * 分表策略
  * @author zhangliang
  */
 @Getter
 @ToString
 public final class TableRule {
-    
+
+    //逻辑表名
     private final String logicTable;
     
     private final List<DataNode> actualDataNodes;
-    
+    //分库规则
     private final ShardingStrategy databaseShardingStrategy;
-    
+    //分表规则
     private final ShardingStrategy tableShardingStrategy;
     
     private final String generateKeyColumn;

@@ -50,7 +50,7 @@ public final class ShardingRule {
     private final Map<String, DataSource> dataSourceMap;
     
     private final String defaultDataSourceName;
-    
+    //分表策略
     private final Collection<TableRule> tableRules;
     
     private final Collection<BindingTableRule> bindingTableRules = new LinkedList<>();
@@ -90,6 +90,7 @@ public final class ShardingRule {
     
     /**
      * Try to find table rule though logic table name.
+     * 试图通过逻辑表名查找表策略。
      * 
      * @param logicTableName logic table name
      * @return table rule
@@ -105,6 +106,7 @@ public final class ShardingRule {
     
     /**
      * Find table rule though logic table name.
+     * 根据逻辑表名 查询分表策略
      *
      * @param logicTableName logic table name
      * @return table rule
@@ -114,9 +116,11 @@ public final class ShardingRule {
         if (tableRule.isPresent()) {
             return tableRule.get();
         }
+        //没有找到分表策略，如果存在默认数据源，则使用默认数据源
         if (null != defaultDataSourceName) {
             return createTableRuleWithDefaultDataSource(logicTableName.toLowerCase());
         }
+        //没有找到，也没有默认数据源，抛出异常
         throw new ShardingJdbcException("Cannot find table rule and default data source with logic table: '%s'", logicTableName);
     }
     
@@ -160,6 +164,7 @@ public final class ShardingRule {
     
     /**
      * Adjust logic tables is all belong to binding tables.
+     * 逻辑表都属于绑定表。
      *
      * @param logicTables names of logic tables
      * @return logic tables is all belong to binding tables or not
@@ -168,6 +173,7 @@ public final class ShardingRule {
         if (logicTables.isEmpty()) {
             return false;
         }
+        //通过逻辑表名获取绑定表策略。
         Optional<BindingTableRule> bindingTableRule = findBindingTableRule(logicTables);
         if (!bindingTableRule.isPresent()) {
             return false;
@@ -180,6 +186,7 @@ public final class ShardingRule {
     
     /**
      * Adjust logic tables is all belong to default data source.
+     * 逻辑表都属于默认数据源。
      *
      * @param logicTables names of logic tables
      * @return logic tables is all belong to default data source
@@ -195,7 +202,7 @@ public final class ShardingRule {
     
     private Optional<BindingTableRule> findBindingTableRule(final Collection<String> logicTables) {
         for (String each : logicTables) {
-            Optional<BindingTableRule> result = findBindingTableRule(each);
+            Optional<BindingTableRule> result = findBindingTableRule(each);//通过逻辑表名获取绑定表策略。
             if (result.isPresent()) {
                 return result;
             }
@@ -205,6 +212,7 @@ public final class ShardingRule {
     
     /**
      * Get binding table rule via logic table name.
+     * 通过逻辑表名获取绑定表策略。
      *
      * @param logicTable logic table name
      * @return binding table rule

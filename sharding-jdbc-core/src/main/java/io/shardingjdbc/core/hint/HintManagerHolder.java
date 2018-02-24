@@ -55,7 +55,7 @@ public final class HintManagerHolder {
      * @return use sharding hint in current thread or not
      */
     public static boolean isUseShardingHint() {
-        return null != HINT_MANAGER_HOLDER.get() && HINT_MANAGER_HOLDER.get().isShardingHint();
+         return null != HINT_MANAGER_HOLDER.get() && HINT_MANAGER_HOLDER.get().isShardingHint();
     }
     
     /**

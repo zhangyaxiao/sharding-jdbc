@@ -59,7 +59,7 @@ public final class Conditions {
     
     /**
      * Find condition via column.
-     *
+     * 根据
      * @param column column
      * @return found condition
      */

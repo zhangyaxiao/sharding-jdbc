@@ -46,20 +46,32 @@ import java.util.List;
  */
 @RequiredArgsConstructor
 public final class SimpleRoutingEngine implements RoutingEngine {
-    
+
+    /**
+     * 分表策略
+     */
     private final ShardingRule shardingRule;
-    
+
+    /**
+     * 参数
+     */
     private final List<Object> parameters;
-    
+
+    /**
+     * 逻辑表名
+     */
     private final String logicTableName;
-    
+
+    /**
+     * sql 解析结果
+     */
     private final SQLStatement sqlStatement;
     
     @Override
     public RoutingResult route() {
-        TableRule tableRule = shardingRule.getTableRule(logicTableName);
-        List<ShardingValue> databaseShardingValues = getDatabaseShardingValues(tableRule);
-        List<ShardingValue> tableShardingValues = getTableShardingValues(tableRule);
+        TableRule tableRule = shardingRule.getTableRule(logicTableName);//根据逻辑表名 获得分库分表策略
+        List<ShardingValue> databaseShardingValues = getDatabaseShardingValues(tableRule);//
+        List<ShardingValue> tableShardingValues = getTableShardingValues(tableRule);//
         Collection<String> routedDataSources = routeDataSources(tableRule, databaseShardingValues);
         Collection<DataNode> routedDataNodes = new LinkedList<>();
         for (String each : routedDataSources) {
@@ -69,7 +81,7 @@ public final class SimpleRoutingEngine implements RoutingEngine {
     }
     
     private List<ShardingValue> getDatabaseShardingValues(final TableRule tableRule) {
-        ShardingStrategy strategy = shardingRule.getDatabaseShardingStrategy(tableRule);
+        ShardingStrategy strategy = shardingRule.getDatabaseShardingStrategy(tableRule);//根据策略得到分库规则
         return HintManagerHolder.isUseShardingHint() ? getDatabaseShardingValuesFromHint(strategy.getShardingColumns()) : getShardingValues(strategy.getShardingColumns());
     }
     
@@ -99,7 +111,13 @@ public final class SimpleRoutingEngine implements RoutingEngine {
         }
         return result;
     }
-    
+
+    /**
+     * sql中的查询条件中 是否包含分片字段
+     * 如果包含 返回 ShardingValue
+     * @param shardingColumns 分片字段。用于将数据库(表)水平拆分的关键字段
+     * @return
+     */
     private List<ShardingValue> getShardingValues(final Collection<String> shardingColumns) {
         List<ShardingValue> result = new ArrayList<>(shardingColumns.size());
         for (String each : shardingColumns) {

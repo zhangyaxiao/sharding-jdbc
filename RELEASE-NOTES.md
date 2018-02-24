@@ -1,7 +1,21 @@
+## 2.1.0
+
+### 里程碑
+1. Sharding-JDBC-Server发布. 支持以数据库的形式使用Sharding-JDBC, 全面提供对MySQL命令行以及图形化客户端的支持
+
+### 功能提升
+1. [ISSUE #608](https://github.com/shardingjdbc/sharding-jdbc/issues/608) 支持MySQL的USE语句
+1. [ISSUE #609](https://github.com/shardingjdbc/sharding-jdbc/issues/609) 支持MySQL的SHOW语句
+1. [ISSUE #611](https://github.com/shardingjdbc/sharding-jdbc/issues/611) 支持MySQL的DESC语句
+
 ## 2.0.3
+
+### 功能提升
+1. [ISSUE #600](https://github.com/shardingjdbc/sharding-jdbc/issues/600) 支持TCL
 
 ### 缺陷修正
 1. [ISSUE #522](https://github.com/shardingjdbc/sharding-jdbc/issues/522) 读写分离Slave库不需要执行DDL语句
+1. [ISSUE #540](https://github.com/shardingjdbc/sharding-jdbc/issues/540) 梳理并支持别名为关键字SQL
 1. [ISSUE #577](https://github.com/shardingjdbc/sharding-jdbc/issues/577) 支持YAML配置换行
 
 ## 2.0.2

@@ -17,17 +17,24 @@
 
 package io.shardingjdbc.core.parsing;
 
-import io.shardingjdbc.core.parsing.lexer.Lexer;
-import io.shardingjdbc.core.parsing.lexer.analyzer.Dictionary;
+import io.shardingjdbc.core.constant.DatabaseType;
+import io.shardingjdbc.core.parsing.lexer.LexerEngine;
+import io.shardingjdbc.core.parsing.lexer.LexerEngineFactory;
+import io.shardingjdbc.core.parsing.lexer.dialect.mysql.MySQLKeyword;
 import io.shardingjdbc.core.parsing.lexer.token.Assist;
 import io.shardingjdbc.core.parsing.lexer.token.DefaultKeyword;
 import io.shardingjdbc.core.parsing.lexer.token.Keyword;
 import io.shardingjdbc.core.parsing.lexer.token.TokenType;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.DescStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowType;
 import io.shardingjdbc.core.parsing.parser.exception.SQLParsingException;
 import io.shardingjdbc.core.parsing.parser.sql.SQLStatement;
 import io.shardingjdbc.core.parsing.parser.sql.ddl.DDLStatement;
 import io.shardingjdbc.core.parsing.parser.sql.dml.DMLStatement;
 import io.shardingjdbc.core.parsing.parser.sql.dql.select.SelectStatement;
+import io.shardingjdbc.core.parsing.parser.sql.ignore.IgnoreStatement;
+import io.shardingjdbc.core.parsing.parser.sql.tcl.TCLStatement;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -46,10 +53,10 @@ public final class SQLJudgeEngine {
      * @return SQL statement
      */
     public SQLStatement judge() {
-        Lexer lexer = new Lexer(sql, new Dictionary());
-        lexer.nextToken();
+        LexerEngine lexerEngine = LexerEngineFactory.newInstance(DatabaseType.MySQL, sql);
+        lexerEngine.nextToken();
         while (true) {
-            TokenType tokenType = lexer.getCurrentToken().getType();
+            TokenType tokenType = lexerEngine.getCurrentToken().getType();
             if (tokenType instanceof Keyword) {
                 if (DefaultKeyword.SELECT == tokenType) {
                     return new SelectStatement();
@@ -60,11 +67,24 @@ public final class SQLJudgeEngine {
                 if (DefaultKeyword.CREATE == tokenType || DefaultKeyword.ALTER == tokenType || DefaultKeyword.DROP == tokenType || DefaultKeyword.TRUNCATE == tokenType) {
                     return new DDLStatement();
                 }
+                if (DefaultKeyword.SET == tokenType || DefaultKeyword.COMMIT == tokenType || DefaultKeyword.ROLLBACK == tokenType 
+                        || DefaultKeyword.SAVEPOINT == tokenType || DefaultKeyword.BEGIN == tokenType) {
+                    return new TCLStatement();
+                }
+                if (DefaultKeyword.USE == tokenType) {
+                    return new IgnoreStatement();
+                }
+                if (DefaultKeyword.DESC == tokenType) {
+                    return new DescStatement();
+                }
+                if (MySQLKeyword.SHOW == tokenType) {
+                    return new ShowStatement(ShowType.OTHER);
+                }
             }
             if (tokenType instanceof Assist && Assist.END == tokenType) {
                 throw new SQLParsingException("Unsupported SQL statement: [%s]", sql);
             }
-            lexer.nextToken();
+            lexerEngine.nextToken();
         }
     }
 }

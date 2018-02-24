@@ -27,11 +27,13 @@ import io.shardingjdbc.core.parsing.lexer.token.Keyword;
 public enum MySQLKeyword implements Keyword {
     
     SHOW, 
+    DESCRIBE, 
+    DATABASES, 
+    TABLES, 
     DUAL, 
     LIMIT, 
     OFFSET, 
     VALUE, 
-    BEGIN, 
     FORCE, 
     PARTITION, 
     DISTINCTROW, 

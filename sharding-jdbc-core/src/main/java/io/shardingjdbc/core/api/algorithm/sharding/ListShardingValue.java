@@ -32,10 +32,11 @@ import java.util.Collection;
 @Getter
 @ToString
 public final class ListShardingValue<T extends Comparable<?>> implements ShardingValue {
-    
+
+    //逻辑表名
     private final String logicTableName;
-    
+    //列名
     private final String columnName;
-    
+    //查询条件中 列对应的值
     private final Collection<T> values;
 }

@@ -53,20 +53,32 @@ public final class InlineShardingStrategy implements ShardingStrategy {
     public Collection<String> doSharding(final Collection<String> availableTargetNames, final Collection<ShardingValue> shardingValues) {
         ShardingValue shardingValue = shardingValues.iterator().next();
         Preconditions.checkState(shardingValue instanceof ListShardingValue, "Inline strategy cannot support range sharding.");
+        //根据shardingValue 中的值，计算出对应的数据库名称
         Collection<String> shardingResult = doSharding((ListShardingValue) shardingValue);
         Collection<String> result = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
         result.addAll(shardingResult);
         return result;
     }
-    
+
+    /**
+     * 根据shardingValue 中的值，得出 对应的数据库名称
+     * @param shardingValue
+     * @return
+     */
     private Collection<String> doSharding(final ListShardingValue shardingValue) {
         Collection<String> result = new LinkedList<>();
         for (PreciseShardingValue<?> each : transferToPreciseShardingValues(shardingValue)) {
+            //将 执行结果 保存到result中
             result.add(execute(each));
         }
         return result;
     }
-    
+
+    /**
+     * ListShardingValue 转成 PreciseShardingValue
+     * @param shardingValue
+     * @return
+     */
     @SuppressWarnings("unchecked")
     private List<PreciseShardingValue> transferToPreciseShardingValues(final ListShardingValue<?> shardingValue) {
         List<PreciseShardingValue> result = new ArrayList<>(shardingValue.getValues().size());
@@ -75,7 +87,12 @@ public final class InlineShardingStrategy implements ShardingStrategy {
         }
         return result;
     }
-    
+
+    /**
+     * 执行groovy
+     * @param shardingValue
+     * @return
+     */
     private String execute(final PreciseShardingValue shardingValue) {
         Closure<?> result = closure.rehydrate(new Expando(), null, null);
         result.setResolveStrategy(Closure.DELEGATE_ONLY);

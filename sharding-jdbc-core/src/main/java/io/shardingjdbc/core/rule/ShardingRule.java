@@ -112,6 +112,7 @@ public final class ShardingRule {
      * @return table rule
      */
     public TableRule getTableRule(final String logicTableName) {
+        //试图通过逻辑表名查找表策略。
         Optional<TableRule> tableRule = tryFindTableRule(logicTableName.toLowerCase());
         if (tableRule.isPresent()) {
             return tableRule.get();

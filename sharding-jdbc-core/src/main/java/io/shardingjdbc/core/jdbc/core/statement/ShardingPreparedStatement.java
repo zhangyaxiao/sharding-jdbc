@@ -117,6 +117,7 @@ public final class ShardingPreparedStatement extends AbstractShardingPreparedSta
             //执行器执行 解析结果
             List<ResultSet> resultSets = new PreparedStatementExecutor(
                     getConnection().getShardingContext().getExecutorEngine(), routeResult.getSqlStatement().getType(), preparedStatementUnits, getParameters()).executeQuery();
+            //结果归并
             result = new ShardingResultSet(resultSets, new MergeEngine(resultSets, (SelectStatement) routeResult.getSqlStatement()).merge(), this);
         } finally {
             clearBatch();

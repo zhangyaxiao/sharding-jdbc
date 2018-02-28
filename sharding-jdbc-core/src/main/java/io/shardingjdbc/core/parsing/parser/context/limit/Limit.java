@@ -65,7 +65,7 @@ public final class Limit {
     
     /**
      * Fill parameters for rewrite limit.
-     *
+     * 重写limit参数
      * @param parameters parameters
      * @param isFetchAll is fetch all data or not
      */

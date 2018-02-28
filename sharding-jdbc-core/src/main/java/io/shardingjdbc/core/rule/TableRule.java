@@ -41,7 +41,7 @@ public final class TableRule {
 
     //逻辑表名
     private final String logicTable;
-    
+    //实际的 数据库 和 表
     private final List<DataNode> actualDataNodes;
     //分库规则
     private final ShardingStrategy databaseShardingStrategy;
@@ -86,6 +86,7 @@ public final class TableRule {
     
     /**
      * Get actual data source names.
+     * 获取实际的数据库名称
      *
      * @return actual data source names
      */
@@ -99,7 +100,7 @@ public final class TableRule {
     
     /**
      * Get actual table names via target data source name.
-     *
+     * 获取实际的表名称
      * @param targetDataSource target data source name
      * @return names of actual tables
      */

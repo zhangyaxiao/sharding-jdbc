@@ -86,18 +86,26 @@ public final class ParsingSQLRouter implements SQLRouter {
     
     @Override
     public SQLRouteResult route(final String logicSQL, final List<Object> parameters, final SQLStatement sqlStatement) {
-        SQLRouteResult result = new SQLRouteResult(sqlStatement);
+        SQLRouteResult result = new SQLRouteResult(sqlStatement);//创建 SQLRouteResult
         if (sqlStatement instanceof InsertStatement && null != ((InsertStatement) sqlStatement).getGeneratedKey()) {
             processGeneratedKey(parameters, (InsertStatement) sqlStatement, result);
         }
+        //根据sql 解析结果sqlStatement 进行路由
         RoutingResult routingResult = route(parameters, sqlStatement);
+
+        //创建sql 重写引擎
         SQLRewriteEngine rewriteEngine = new SQLRewriteEngine(shardingRule, logicSQL, databaseType, sqlStatement);
-        boolean isSingleRouting = routingResult.isSingleRouting();
+        boolean isSingleRouting = routingResult.isSingleRouting();//是否单表执行
+
+        // 查询语句，包含 limit
         if (sqlStatement instanceof SelectStatement && null != ((SelectStatement) sqlStatement).getLimit()) {
+            //重写 limit 参数
             processLimit(parameters, (SelectStatement) sqlStatement, isSingleRouting);
         }
+        //sql 重写
         SQLBuilder sqlBuilder = rewriteEngine.rewrite(!isSingleRouting);
-        if (routingResult instanceof CartesianRoutingResult) {
+
+        if (routingResult instanceof CartesianRoutingResult) {//需要笛卡尔积
             for (CartesianDataSource cartesianDataSource : ((CartesianRoutingResult) routingResult).getRoutingDataSources()) {
                 for (CartesianTableReference cartesianTableReference : cartesianDataSource.getRoutingTableReferences()) {
                     result.getExecutionUnits().add(new SQLExecutionUnit(cartesianDataSource.getDataSource(), rewriteEngine.generateSQL(cartesianTableReference, sqlBuilder)));
@@ -105,6 +113,7 @@ public final class ParsingSQLRouter implements SQLRouter {
             }
         } else {
             for (TableUnit each : routingResult.getTableUnits().getTableUnits()) {
+                //重写完的 sql保存到result中
                 result.getExecutionUnits().add(new SQLExecutionUnit(each.getDataSourceName(), rewriteEngine.generateSQL(each, sqlBuilder)));
             }
         }
@@ -113,23 +122,25 @@ public final class ParsingSQLRouter implements SQLRouter {
         }
         return result;
     }
-    
+
+    //根据sql解析结果sqlStatement 进行路由
     private RoutingResult route(final List<Object> parameters, final SQLStatement sqlStatement) {
-        Collection<String> tableNames = sqlStatement.getTables().getTableNames();//sql 涉及的表名
-        RoutingEngine routingEngine;
+        //sql 涉及的表名
+        Collection<String> tableNames = sqlStatement.getTables().getTableNames();
+        RoutingEngine routingEngine;//路由引擎
+        //根据 sqlStatement 创建对应的 路由引擎
         if (sqlStatement instanceof DDLStatement) {// create alter drop
             routingEngine = new DDLRoutingEngine(shardingRule, parameters, (DDLStatement) sqlStatement); 
         } else if (tableNames.isEmpty()) {//不涉及表
             routingEngine = new DatabaseAllRoutingEngine(shardingRule.getDataSourceMap());
-        } else if (1 == tableNames.size() || shardingRule.isAllBindingTables(tableNames) || shardingRule.isAllInDefaultDataSource(tableNames)) {
-            //单表，
-            // TODO zyx 或者
+        } else if (1 == tableNames.size() || shardingRule.isAllBindingTables(tableNames) || shardingRule.isAllInDefaultDataSource(tableNames)) {// TODO zyx 单表 或者
             //创建简单的路由引擎
             routingEngine = new SimpleRoutingEngine(shardingRule, parameters, tableNames.iterator().next(), sqlStatement);
         } else {
             // TODO config for cartesian set
             routingEngine = new ComplexRoutingEngine(shardingRule, parameters, tableNames, sqlStatement);
         }
+        //路由
         return routingEngine.route();
     }
     
@@ -153,11 +164,14 @@ public final class ParsingSQLRouter implements SQLRouter {
     }
     
     private void processLimit(final List<Object> parameters, final SelectStatement selectStatement, final boolean isSingleRouting) {
+        //单表查询，清空limit，直接返回
         if (isSingleRouting) {
             selectStatement.setLimit(null);
             return;
         }
+        //是否需要全部执行
         boolean isNeedFetchAll = (!selectStatement.getGroupByItems().isEmpty() || !selectStatement.getAggregationSelectItems().isEmpty()) && !selectStatement.isSameGroupByAndOrderByItems();
+        //重写limit参数
         selectStatement.getLimit().processParameters(parameters, isNeedFetchAll);
     }
 }

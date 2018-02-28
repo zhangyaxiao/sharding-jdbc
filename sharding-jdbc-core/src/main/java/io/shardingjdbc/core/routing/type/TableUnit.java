@@ -24,7 +24,7 @@ import lombok.ToString;
 
 /**
  * Route table unit.
- * 
+ *
  * @author zhangliang
  */
 @RequiredArgsConstructor
@@ -32,10 +32,11 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 public final class TableUnit {
-    
+
+    //数据库
     private final String dataSourceName;
-    
+    //逻辑表名
     private final String logicTableName;
-    
+    //实际表名
     private final String actualTableName;
 }

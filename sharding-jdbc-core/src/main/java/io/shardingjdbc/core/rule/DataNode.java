@@ -28,7 +28,7 @@ import java.util.List;
 
 /**
  * Sharding data unit node.
- * 
+ * 分片数据最小单元
  * @author zhangliang
  */
 @RequiredArgsConstructor
@@ -38,9 +38,10 @@ import java.util.List;
 public class DataNode {
     
     private static final String DELIMITER = ".";
-    
+
+    //数据库 库名
     private final String dataSourceName;
-    
+    //实际表名
     private final String tableName;
     
     /**

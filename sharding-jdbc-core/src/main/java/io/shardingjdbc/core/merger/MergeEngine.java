@@ -66,6 +66,7 @@ public final class MergeEngine {
     
     /**
      * Merge result sets.
+     * 结果集合并
      *
      * @return merged result set.
      * @throws SQLException SQL exception

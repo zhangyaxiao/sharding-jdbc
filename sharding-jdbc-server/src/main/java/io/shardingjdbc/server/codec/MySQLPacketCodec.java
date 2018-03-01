@@ -22,15 +22,20 @@ public final class MySQLPacketCodec extends ByteToMessageCodec<AbstractMySQLSent
     @Override
     protected void decode(final ChannelHandlerContext context, final ByteBuf in, final List<Object> out) throws Exception {
         int readableBytes = in.readableBytes();
-        if (readableBytes < AbstractMySQLPacket.PAYLOAD_LENGTH) {
+        if (readableBytes < AbstractMySQLPacket.PAYLOAD_LENGTH + AbstractMySQLPacket.SEQUENCE_LENGTH) {
             return;
         }
         if (log.isDebugEnabled()) {
             log.debug("Read from client: \n {}", ByteBufUtil.prettyHexDump(in));
         }
         int payloadLength = in.markReaderIndex().readMediumLE();
-        if (readableBytes < payloadLength) {
+        int realPacketLength = payloadLength + AbstractMySQLPacket.PAYLOAD_LENGTH + AbstractMySQLPacket.SEQUENCE_LENGTH;
+        if (readableBytes < realPacketLength) {
             in.resetReaderIndex();
+            return;
+        }
+        if (readableBytes > realPacketLength) {
+            out.add(in.readRetainedSlice(payloadLength + AbstractMySQLPacket.SEQUENCE_LENGTH));
             return;
         }
         out.add(in);

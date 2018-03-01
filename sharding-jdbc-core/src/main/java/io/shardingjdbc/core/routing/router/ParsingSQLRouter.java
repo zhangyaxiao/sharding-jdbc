@@ -21,13 +21,16 @@ import io.shardingjdbc.core.constant.DatabaseType;
 import io.shardingjdbc.core.jdbc.core.ShardingContext;
 import io.shardingjdbc.core.parsing.SQLParsingEngine;
 import io.shardingjdbc.core.parsing.parser.context.GeneratedKey;
-import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.DescStatement;
-import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.DescribeStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowColumnsStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowDatabasesStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowOtherStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.ShowTablesStatement;
+import io.shardingjdbc.core.parsing.parser.dialect.mysql.statement.UseStatement;
 import io.shardingjdbc.core.parsing.parser.sql.SQLStatement;
 import io.shardingjdbc.core.parsing.parser.sql.ddl.DDLStatement;
 import io.shardingjdbc.core.parsing.parser.sql.dml.insert.InsertStatement;
 import io.shardingjdbc.core.parsing.parser.sql.dql.select.SelectStatement;
-import io.shardingjdbc.core.parsing.parser.sql.ignore.IgnoreStatement;
 import io.shardingjdbc.core.rewrite.SQLBuilder;
 import io.shardingjdbc.core.rewrite.SQLRewriteEngine;
 import io.shardingjdbc.core.routing.SQLExecutionUnit;
@@ -35,15 +38,14 @@ import io.shardingjdbc.core.routing.SQLRouteResult;
 import io.shardingjdbc.core.routing.type.RoutingEngine;
 import io.shardingjdbc.core.routing.type.RoutingResult;
 import io.shardingjdbc.core.routing.type.TableUnit;
-import io.shardingjdbc.core.routing.type.all.DatabaseAllRoutingEngine;
+import io.shardingjdbc.core.routing.type.broadcast.DatabaseBroadcastRoutingEngine;
+import io.shardingjdbc.core.routing.type.broadcast.TableBroadcastRoutingEngine;
 import io.shardingjdbc.core.routing.type.complex.CartesianDataSource;
 import io.shardingjdbc.core.routing.type.complex.CartesianRoutingResult;
 import io.shardingjdbc.core.routing.type.complex.CartesianTableReference;
 import io.shardingjdbc.core.routing.type.complex.ComplexRoutingEngine;
-import io.shardingjdbc.core.routing.type.ddl.DDLRoutingEngine;
 import io.shardingjdbc.core.routing.type.ignore.IgnoreRoutingEngine;
-import io.shardingjdbc.core.routing.type.show.ShowRoutingEngine;
-import io.shardingjdbc.core.routing.type.simple.SimpleRoutingEngine;
+import io.shardingjdbc.core.routing.type.standard.StandardRoutingEngine;
 import io.shardingjdbc.core.routing.type.unicast.UnicastRoutingEngine;
 import io.shardingjdbc.core.rule.ShardingRule;
 import io.shardingjdbc.core.util.SQLLogger;
@@ -117,18 +119,18 @@ public final class ParsingSQLRouter implements SQLRouter {
     private RoutingResult route(final List<Object> parameters, final SQLStatement sqlStatement) {
         Collection<String> tableNames = sqlStatement.getTables().getTableNames();
         RoutingEngine routingEngine;
-        if (sqlStatement instanceof IgnoreStatement) {
+        if (sqlStatement instanceof UseStatement) {
             routingEngine = new IgnoreRoutingEngine();
         } else if (sqlStatement instanceof DDLStatement) {
-            routingEngine = new DDLRoutingEngine(shardingRule, parameters, (DDLStatement) sqlStatement);
-        } else if (sqlStatement instanceof ShowStatement) {
-            routingEngine = new ShowRoutingEngine(shardingRule, (ShowStatement) sqlStatement);
-        } else if (sqlStatement instanceof DescStatement) {
+            routingEngine = new TableBroadcastRoutingEngine(shardingRule, sqlStatement);
+        } else if (sqlStatement instanceof ShowDatabasesStatement || sqlStatement instanceof ShowTablesStatement) {
+            routingEngine = new DatabaseBroadcastRoutingEngine(shardingRule);
+        } else if (sqlStatement instanceof ShowColumnsStatement || sqlStatement instanceof ShowOtherStatement || sqlStatement instanceof DescribeStatement) {
             routingEngine = new UnicastRoutingEngine(shardingRule, sqlStatement);
         } else if (tableNames.isEmpty()) {
-            routingEngine = new DatabaseAllRoutingEngine(shardingRule.getDataSourceMap());
+            routingEngine = new DatabaseBroadcastRoutingEngine(shardingRule);
         } else if (1 == tableNames.size() || shardingRule.isAllBindingTables(tableNames) || shardingRule.isAllInDefaultDataSource(tableNames)) {
-            routingEngine = new SimpleRoutingEngine(shardingRule, parameters, tableNames.iterator().next(), sqlStatement);
+            routingEngine = new StandardRoutingEngine(shardingRule, parameters, tableNames.iterator().next(), sqlStatement);
         } else {
             // TODO config for cartesian set
             routingEngine = new ComplexRoutingEngine(shardingRule, parameters, tableNames, sqlStatement);

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:sharding="http://shardingjdbc.io/schema/shardingjdbc/sharding"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/tx
+                        http://www.springframework.org/schema/tx/spring-tx.xsd
+                        http://www.springframework.org/schema/context
+                        http://www.springframework.org/schema/context/spring-context.xsd
+                        http://shardingjdbc.io/schema/shardingjdbc/sharding
+                        http://shardingjdbc.io/schema/shardingjdbc/sharding/sharding.xsd">
+
+    <bean name = "parentDataSource" class = "com.alibaba.druid.pool.DruidDataSource" destroy-method = "close" >
+        <property name = "driverClassName" value = "${driverClassName}" />
+        <property name = "filters" value = "${filters}" />
+        <property name = "maxActive" value = "${maxActive}" />
+        <property name = "initialSize" value = "${initialSize}" />
+        <property name = "maxWait" value = "${maxWait}" />
+        <property name = "minIdle" value = "${minIdle}" />
+        <property name = "timeBetweenEvictionRunsMillis" value ="${timeBetweenEvictionRunsMillis}" />
+        <property name = "minEvictableIdleTimeMillis" value ="${minEvictableIdleTimeMillis}" />
+        <property name = "validationQuery" value = "${validationQuery}" />
+        <property name = "testWhileIdle" value = "${testWhileIdle}" />
+        <property name = "testOnBorrow" value = "${testOnBorrow}" />
+        <property name = "testOnReturn" value = "${testOnReturn}" />
+        <property name = "maxOpenPreparedStatements" value ="${maxOpenPreparedStatements}" />
+        <property name = "removeAbandoned" value = "${removeAbandoned}" />
+        <property name = "removeAbandonedTimeout" value ="${removeAbandonedTimeout}" />
+        <property name = "logAbandoned" value = "${logAbandoned}" />
+    </bean >
+
+    <bean id = "ds_0" parent="parentDataSource" >
+        <property name = "url" value = "${one_url}" />
+        <property name = "username" value = "${username}" />
+        <property name = "password" value = "${password}" />
+    </bean >
+
+    <bean id = "ds_1" parent="parentDataSource" >
+        <property name = "url" value = "${promotion_url}" />
+        <property name = "username" value = "${username}" />
+        <property name = "password" value = "${password}" />
+    </bean >
+
+
+    <!-- sharding-jdbc -->
+    <sharding:inline-strategy id="databaseStrategy" sharding-column="user_id" algorithm-expression="ds_${user_id % 2}" />
+    <sharding:inline-strategy id="orderTableStrategy" sharding-column="order_id" algorithm-expression="t_order_${order_id % 2}" />
+    <sharding:inline-strategy id="orderItemDatabaseStrategy" sharding-column="order_id" algorithm-expression="ds_${order_id % 2}" />
+    <sharding:inline-strategy id="orderItemTableStrategy" sharding-column="order_id" algorithm-expression="t_order_item_${order_id % 10}" />
+
+    <sharding:data-source id="shardingDataSource">
+        <sharding:sharding-rule data-source-names="ds_0,ds_1">
+            <sharding:table-rules>
+                <sharding:table-rule logic-table="t_order" actual-data-nodes="ds_${0..1}.t_order_${0..1}" database-strategy-ref="databaseStrategy" table-strategy-ref="orderTableStrategy" />
+                <sharding:table-rule logic-table="t_order_item" actual-data-nodes="ds_0.t_order_item_${[2,4,6,8,0]},ds_1.t_order_item_${[1,3,5,7,9]}" database-strategy-ref="orderItemDatabaseStrategy" table-strategy-ref="orderItemTableStrategy" />
+            </sharding:table-rules>
+        </sharding:sharding-rule>
+    </sharding:data-source>
+
+
+
+    <!-- 配置sqlSessionFactory -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 配置数据源 -->
+        <property name="dataSource" ref="shardingDataSource" />
+        <!-- 配置文件 -->
+        <property name="configLocation" value="classpath:mybatis-config.xml" />
+        <!-- 配置mapper路径 -->
+        <property name="mapperLocations" value="classpath*:com/zyx/demo/mapper/**/*Mapper.xml"/>
+    </bean>
+
+    <!-- 配置sqlSessionTemplate -->
+    <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg ref="sqlSessionFactory"/>
+    </bean>
+
+    <!-- 配置MapperScannerConfigurer -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionTemplateBeanName" value="sqlSessionTemplate" />
+        <property name="basePackage" value="io.shardingjdbc.**.dao" />
+    </bean>
+
+
+</beans>

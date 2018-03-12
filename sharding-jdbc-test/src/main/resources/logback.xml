@@ -1,0 +1,109 @@
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <property resource="logback.properties"/>
+    <appender name="file-info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>
+            ${demo.log.dir}/${demo.log.info.filename}.log
+        </file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${demo.log.dir}/${demo.log.info.filename}.%d{yyyy-MM-dd}-%i.log
+            </fileNamePattern>
+            <MaxHistory>${demo.log.maxhistory}</MaxHistory>
+            <MaxFileSize>${demo.log.maxfilesize}</MaxFileSize>
+        </rollingPolicy>
+        <encoder charset="${demo.log.charset}">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %logger %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="file-debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>
+            ${demo.log.dir}/${demo.log.debug.filename}.log
+        </file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${demo.log.dir}/${demo.log.debug.filename}.%d{yyyy-MM-dd}-%i.log
+            </fileNamePattern>
+            <MaxHistory>${demo.log.maxhistory}</MaxHistory>
+            <MaxFileSize>${demo.log.maxfilesize}</MaxFileSize>
+        </rollingPolicy>
+        <encoder charset="${demo.log.charset}">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %logger %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="file-warn" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>
+            ${demo.log.dir}/${demo.log.warn.filename}.log
+        </file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${demo.log.dir}/${demo.log.warn.filename}.%d{yyyy-MM-dd}-%i.log
+            </fileNamePattern>
+            <MaxHistory>${demo.log.maxhistory}</MaxHistory>
+            <MaxFileSize>${demo.log.maxfilesize}</MaxFileSize>
+        </rollingPolicy>
+        <encoder charset="${demo.log.charset}">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %logger %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="file-error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>
+            ${demo.log.dir}/${demo.log.error.filename}.log
+        </file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${demo.log.dir}/${demo.log.error.filename}.%d{yyyy-MM-dd}-%i.log
+            </fileNamePattern>
+            <MaxHistory>${demo.log.maxhistory}</MaxHistory>
+            <MaxFileSize>${demo.log.maxfilesize}</MaxFileSize>
+        </rollingPolicy>
+        <encoder charset="${demo.log.charset}">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %logger %m%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${demo.log.level}</level>
+        </filter>
+        <encoder charset="${demo.log.charset}">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5p %logger %m%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <!-- 将日志按照级别输出到对应文件，并向上级传递日志 -->
+    <logger name="com.zyx" level="debug" additivity="true">
+        <appender-ref ref="file-info"/>
+        <appender-ref ref="file-debug"/>
+        <appender-ref ref="file-warn"/>
+        <appender-ref ref="file-error"/>
+    </logger>
+
+    <!-- 将日志输出到控制台 -->
+    <root level="${demo.log.level}">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>

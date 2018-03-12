@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 不写会报错 -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org/DTD Mapper 3.0" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.shardingjdbc.dao.OrderDao">
+    <!-- 自定义返回结果集 -->
+    <resultMap id="OrderMap" type="io.shardingjdbc.po.OrderPO">
+        <id property="order_id" column="order_id" javaType="java.lang.Integer"></id>
+        <result property="user_id" column="user_id" javaType="java.lang.Integer"></result>
+    </resultMap>
+
+    <insert id="insertOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into t_Order (order_id,user_id) values (#{order_id},#{user_id})
+    </insert>
+
+    <update id="updateOrder" >
+        update t_Order set user_id=#{user_id} where order_id=#{order_id}
+    </update>
+
+    <delete id="deleteOrder" parameterType="int">
+        delete from t_Order where order_id=#{order_id}
+    </delete>
+
+    <select id="selectOrderById" parameterType="int" resultMap="OrderMap">
+        select * from t_Order where order_id=#{order_id}
+    </select>
+
+    <select id="selectAllOrder" resultMap="OrderMap">
+        select * from t_Order
+    </select>
+
+</mapper>
